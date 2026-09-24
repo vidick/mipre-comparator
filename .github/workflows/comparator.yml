@@ -24,12 +24,13 @@ jobs:
       # lean4export loads the whole library, and comparator then holds the
       # exported proof in memory while replaying it: more than the runner's
       # 16 GB may be needed.
+      # (The runner already has a small /swapfile in use; this adds a second.)
       - name: Add swap
         run: |
-          sudo fallocate -l 16G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
+          sudo fallocate -l 16G /comparator.swap
+          sudo chmod 600 /comparator.swap
+          sudo mkswap /comparator.swap
+          sudo swapon /comparator.swap
           free -h
       - name: Install elan
         run: |

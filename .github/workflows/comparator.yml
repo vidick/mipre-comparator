@@ -1,0 +1,37 @@
+name: comparator
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    # Compiling MIPRE-formalization from source (about 400k lines, one module of 71k)
+    # dominates the run.
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      # Mathlib's cache and the compiled library together are larger than the
+      # runner's free space by default.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          df -h /
+      - name: Install elan
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Cache comparator toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mipre-comparator
+          key: comparator-${{ hashFiles('lean-toolchain') }}
+      - name: Run comparator
+        env:
+          LANDRUN_LOG_LEVEL: debug
+        run: ./verify.sh

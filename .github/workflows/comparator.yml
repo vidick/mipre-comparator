@@ -37,11 +37,17 @@ jobs:
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
             | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      # nanoda is built from source with cargo.
+      - name: Install Rust
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          cargo --version
       - name: Cache comparator toolchain
         uses: actions/cache@v4
         with:
           path: ~/.cache/mipre-comparator
-          key: comparator-${{ hashFiles('lean-toolchain') }}
+          key: comparator-${{ hashFiles('lean-toolchain', 'verify.sh') }}
       - name: Run comparator
         env:
           LANDRUN_LOG_LEVEL: debug

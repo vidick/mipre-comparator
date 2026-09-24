@@ -50,7 +50,11 @@ and comparator checks that every declaration the statement uses is identical in
 the two environments. Comparator rebuilds both modules in a sandbox — for
 `Solution`, that means compiling the library from source at the commit pinned in
 [`lakefile.toml`](lakefile.toml) — exports them with `lean4export`, compares the
-statements, checks the axioms, and replays the proof through the Lean kernel.
+statements, checks the axioms, and replays the proof through two kernels: Lean's own, and
+[nanoda](https://github.com/ammkrn/nanoda_lib), an independent type checker
+written in Rust (`"enable_nanoda": true` in [`comparator.json`](comparator.json)).
+With both, the trust in the kernel reduces to "the Lean kernel or nanoda is
+correct".
 
 ## Run it
 
@@ -60,7 +64,8 @@ statements, checks the axioms, and replays the proof through the Lean kernel.
 
 This script is intended for Linux, WSL, or GitHub Actions. It downloads
 `leanprover/comparator`, `lean4export`, and `landrun` pinned to this project's
-Lean toolchain, fetches Mathlib's Lake cache, and runs the comparator check.
+Lean toolchain, builds nanoda at a pinned commit (this needs `cargo`), fetches
+Mathlib's Lake cache, and runs the comparator check.
 MIPRE-formalization itself is compiled from source, which takes the better part of
 an hour on a four-core machine.
 
